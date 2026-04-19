@@ -5,33 +5,15 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between, FindManyOptions } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { WorkOrder } from './entities/work-order.entity';
 import { Evidence } from './entities/evidence.entity';
 import { GamificationService } from '../gamification/gamification.service';
 import { ReferralsService } from '../referrals/referrals.service';
+import { StorageService } from '../storage/storage.service';
 import { WOStatus } from '@techfield/types';
-
-export class CreateWorkOrderDto {
-  type: string;
-  clientName: string;
-  clientPhone?: string;
-  vehicleBrand: string;
-  vehicleModel: string;
-  vehicleYear: number;
-  vehiclePlate: string;
-  vehicleColor?: string;
-  vehicleVin?: string;
-  deviceBrand: string;
-  deviceModel: string;
-  deviceImei: string;
-  deviceSim?: string;
-  deviceOperator?: string;
-  devicePlatform?: string;
-  notes?: string;
-  workspaceId?: string;
-}
+import { CreateWorkOrderDto, UpdateWorkOrderDto, CloseWorkOrderDto } from './dto/create-work-order.dto';
 
 @Injectable()
 export class WorkOrdersService {
@@ -40,7 +22,10 @@ export class WorkOrdersService {
     @InjectRepository(Evidence) private readonly evidencesRepo: Repository<Evidence>,
     private readonly gamificationService: GamificationService,
     private readonly referralsService: ReferralsService,
+    private readonly storageService: StorageService,
   ) {}
+
+  // ── CRUD ──────────────────────────────────────────────────────────────────
 
   async create(technicianId: string, dto: CreateWorkOrderDto): Promise<WorkOrder> {
     const wo = this.workOrdersRepo.create({
@@ -53,15 +38,41 @@ export class WorkOrdersService {
     return Array.isArray(saved) ? saved[0] : saved;
   }
 
-  async findAll(technicianId: string, page = 1, limit = 20) {
+  async findAll(
+    technicianId: string,
+    filters: {
+      status?: string;
+      type?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      page?: number;
+      limit?: number;
+    } = {},
+  ) {
+    const { status, type, dateFrom, dateTo, page = 1, limit = 20 } = filters;
+
+    const where: any = { technicianId };
+    if (status) where.status = status;
+    if (type) where.type = type;
+    if (dateFrom && dateTo) {
+      where.createdAt = Between(new Date(dateFrom), new Date(dateTo));
+    }
+
     const [items, total] = await this.workOrdersRepo.findAndCount({
-      where: { technicianId },
+      where,
       order: { createdAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
       relations: ['evidences'],
     });
-    return { items, total, page, limit };
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: string, technicianId: string): Promise<WorkOrder> {
@@ -74,72 +85,154 @@ export class WorkOrdersService {
     return wo;
   }
 
-  async update(id: string, technicianId: string, dto: Partial<WorkOrder>): Promise<WorkOrder> {
+  async update(id: string, technicianId: string, dto: UpdateWorkOrderDto): Promise<WorkOrder> {
     const wo = await this.findOne(id, technicianId);
-    if (wo.status === WOStatus.COMPLETED) {
-      throw new ForbiddenException('No se puede modificar una OT completada');
+    if (wo.status === WOStatus.COMPLETED || wo.status === WOStatus.CANCELLED) {
+      throw new ForbiddenException('No se puede modificar una OT cerrada o cancelada');
+    }
+    // Move to in_progress when first update after draft
+    if (wo.status === WOStatus.DRAFT) {
+      wo.status = WOStatus.IN_PROGRESS;
     }
     Object.assign(wo, dto);
     return this.workOrdersRepo.save(wo);
   }
 
-  async close(id: string, technicianId: string): Promise<WorkOrder> {
+  // ── Signature ─────────────────────────────────────────────────────────────
+
+  async uploadSignature(
+    id: string,
+    technicianId: string,
+    file: Express.Multer.File,
+  ): Promise<WorkOrder> {
+    const wo = await this.findOne(id, technicianId);
+    if (wo.status === WOStatus.COMPLETED) {
+      throw new ForbiddenException('OT ya completada');
+    }
+
+    const key = `signatures/ot-${id}-${Date.now()}.png`;
+    const url = await this.storageService.uploadFile(file.buffer, key, 'image/png');
+
+    wo.clientSignatureUrl = url;
+    return this.workOrdersRepo.save(wo);
+  }
+
+  // ── Close ─────────────────────────────────────────────────────────────────
+
+  async close(id: string, technicianId: string, dto: CloseWorkOrderDto = {}): Promise<WorkOrder> {
     const wo = await this.workOrdersRepo.findOne({
       where: { id },
       relations: ['evidences'],
     });
     if (!wo) throw new NotFoundException('OT no encontrada');
     if (wo.technicianId !== technicianId) throw new ForbiddenException();
+    if (wo.status === WOStatus.COMPLETED) {
+      throw new ForbiddenException('OT ya completada');
+    }
 
     if (wo.evidences.length < 2) {
-      throw new UnprocessableEntityException('Se requieren mínimo 2 fotos de evidencia');
+      throw new UnprocessableEntityException(
+        `Se requieren mínimo 2 fotos de evidencia (tienes ${wo.evidences.length})`,
+      );
     }
     if (!wo.clientSignatureUrl) {
-      throw new UnprocessableEntityException('Se requiere la firma del cliente');
+      throw new UnprocessableEntityException('Se requiere la firma digital del cliente');
     }
 
     wo.status = WOStatus.COMPLETED;
     wo.completedAt = new Date();
+    if (dto.latitude) wo.latitude = dto.latitude;
+    if (dto.longitude) wo.longitude = dto.longitude;
+    if (dto.address) wo.address = dto.address;
+
     const saved = await this.workOrdersRepo.save(wo);
 
-    // Award points
-    await this.gamificationService.onWorkOrderCompleted(
-      technicianId,
-      id,
-      !!wo.clientSignatureUrl,
-    );
+    // Gamification events (fire-and-forget, non-blocking)
+    this.gamificationService
+      .onWorkOrderCompleted(technicianId, id, !!wo.clientSignatureUrl)
+      .catch(() => {});
 
-    // Activate referral if first OT
-    const referralResult = await this.referralsService.activateReferral(technicianId);
-    if (referralResult) {
-      await this.gamificationService.addPoints(
-        referralResult.referrerId,
-        referralResult.points,
-        'Referido completó su primera OT',
-        referralResult.referralId,
-      );
-    }
+    this.referralsService
+      .activateReferral(technicianId)
+      .then(async (result) => {
+        if (result) {
+          await this.gamificationService.addPoints(
+            result.referrerId,
+            result.points,
+            'Referido completó su primera OT',
+            result.referralId,
+          );
+        }
+      })
+      .catch(() => {});
 
     return saved;
   }
 
+  // ── Cancel ────────────────────────────────────────────────────────────────
+
   async cancel(id: string, technicianId: string): Promise<WorkOrder> {
     const wo = await this.findOne(id, technicianId);
-    if (wo.status !== WOStatus.DRAFT) {
-      throw new ForbiddenException('Solo se pueden cancelar OTs en borrador');
+    if (wo.status === WOStatus.COMPLETED) {
+      throw new ForbiddenException('No se puede cancelar una OT completada');
     }
     wo.status = WOStatus.CANCELLED;
     return this.workOrdersRepo.save(wo);
   }
 
+  // ── Share / Public ────────────────────────────────────────────────────────
+
+  async getShareLink(id: string, technicianId: string) {
+    const wo = await this.findOne(id, technicianId);
+    if (wo.status !== WOStatus.COMPLETED) {
+      throw new ForbiddenException('Solo se puede compartir una OT completada');
+    }
+    return {
+      slug: wo.slug,
+      shareUrl: `https://techfieldgps.com/ot/${wo.slug}`,
+      whatsappUrl: `https://wa.me/?text=${encodeURIComponent(
+        `📍 Reporte de instalación GPS\nhttps://techfieldgps.com/ot/${wo.slug}`,
+      )}`,
+    };
+  }
+
   async findBySlug(slug: string): Promise<WorkOrder> {
     const wo = await this.workOrdersRepo.findOne({
-      where: { slug, isPrivate: false },
+      where: { slug, status: WOStatus.COMPLETED, isPrivate: false },
       relations: ['evidences', 'technician'],
     });
     if (!wo) throw new NotFoundException('OT no encontrada');
     return wo;
   }
+
+  // ── Summary stats for dashboard ───────────────────────────────────────────
+
+  async getStats(technicianId: string) {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [total, thisMonth, byStatus] = await Promise.all([
+      this.workOrdersRepo.count({ where: { technicianId, status: WOStatus.COMPLETED } }),
+      this.workOrdersRepo.count({
+        where: {
+          technicianId,
+          status: WOStatus.COMPLETED,
+          completedAt: Between(startOfMonth, now),
+        },
+      }),
+      this.workOrdersRepo
+        .createQueryBuilder('wo')
+        .select('wo.status', 'status')
+        .addSelect('COUNT(*)', 'count')
+        .where('wo.technicianId = :technicianId', { technicianId })
+        .groupBy('wo.status')
+        .getRawMany(),
+    ]);
+
+    return { total, thisMonth, byStatus };
+  }
+
+  // ── Private ───────────────────────────────────────────────────────────────
 
   private generateSlug(): string {
     return uuidv4().replace(/-/g, '').substring(0, 12);
