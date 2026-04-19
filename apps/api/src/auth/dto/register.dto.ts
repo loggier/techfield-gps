@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsPhoneNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray } from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -40,17 +40,35 @@ export class VerifySmsDto {
   code: string;
 }
 
+export class ResendSmsDto {
+  @IsString()
+  @IsNotEmpty()
+  phone: string;
+}
+
 export class LoginDto {
   @IsString()
   @IsNotEmpty()
   phone: string;
 
   @IsString()
+  @IsOptional()
+  pin?: string;
+}
+
+export class SetPinDto {
+  @IsString()
   @IsNotEmpty()
   pin: string;
 }
 
 export class RefreshTokenDto {
+  @IsString()
+  @IsNotEmpty()
+  refreshToken: string;
+}
+
+export class LogoutDto {
   @IsString()
   @IsNotEmpty()
   refreshToken: string;

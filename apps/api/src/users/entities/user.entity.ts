@@ -73,6 +73,9 @@ export class User {
   @Column({ nullable: true, unique: true })
   referralCode: string;
 
+  @Column({ nullable: true, select: false })
+  pinHash: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

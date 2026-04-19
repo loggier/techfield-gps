@@ -7,12 +7,13 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { User } from '../users/entities/user.entity';
 import { Referral } from '../referrals/entities/referral.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({}),
-    TypeOrmModule.forFeature([User, Referral]),
+    TypeOrmModule.forFeature([User, Referral, RefreshToken]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

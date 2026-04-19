@@ -49,7 +49,8 @@ export class WorkOrdersService {
       slug: this.generateSlug(),
       status: WOStatus.DRAFT,
     } as any);
-    return this.workOrdersRepo.save(wo);
+    const saved = await this.workOrdersRepo.save(wo);
+    return Array.isArray(saved) ? saved[0] : saved;
   }
 
   async findAll(technicianId: string, page = 1, limit = 20) {

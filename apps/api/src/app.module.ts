@@ -21,6 +21,7 @@ import { PointsLog } from './gamification/entities/points-log.entity';
 import { UserBadge } from './gamification/entities/user-badge.entity';
 import { KbEntry } from './knowledge-base/entities/kb-entry.entity';
 import { KbVote } from './knowledge-base/entities/kb-vote.entity';
+import { RefreshToken } from './auth/entities/refresh-token.entity';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { KbVote } from './knowledge-base/entities/kb-vote.entity';
         database: config.get('database.name'),
         username: config.get('database.user'),
         password: config.get('database.pass'),
-        entities: [User, Referral, WorkOrder, Evidence, PointsLog, UserBadge, KbEntry, KbVote],
+        entities: [User, Referral, WorkOrder, Evidence, PointsLog, UserBadge, KbEntry, KbVote, RefreshToken],
         synchronize: config.get('nodeEnv') === 'development',
         logging: config.get('nodeEnv') === 'development',
       }),
