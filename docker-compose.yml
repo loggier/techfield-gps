@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: techfield-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: techfield_db
+      POSTGRES_USER: techfield_user
+      POSTGRES_PASSWORD: techfield_pass_change_me
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U techfield_user -d techfield_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: techfield-api
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./apps/api/.env
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./apps/api/src:/app/src
+      - ./packages:/app/packages
+
+volumes:
+  pgdata:
+    driver: local
