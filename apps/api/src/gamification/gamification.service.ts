@@ -172,6 +172,16 @@ export class GamificationService {
     }
   }
 
+  async awardBadgeIfNotExists(userId: string, key: string, name: string): Promise<void> {
+    const [user, existing] = await Promise.all([
+      this.usersRepo.findOne({ where: { id: userId } }),
+      this.badgesRepo.findOne({ where: { userId, badgeKey: key } }),
+    ]);
+    if (!existing) {
+      await this.awardBadge(userId, key, name, user?.fcmToken);
+    }
+  }
+
   private async awardBadge(userId: string, key: string, name: string, fcmToken?: string) {
     await this.badgesRepo.save(this.badgesRepo.create({ userId, badgeKey: key }));
     this.logger.log(`Badge awarded: ${key} → user ${userId}`);

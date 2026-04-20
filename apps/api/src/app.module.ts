@@ -11,6 +11,7 @@ import { EvidencesModule } from './evidences/evidences.module';
 import { StorageModule } from './storage/storage.module';
 import { GamificationModule } from './gamification/gamification.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { PublicModule } from './public/public.module';
 
 // Entities
@@ -53,6 +54,7 @@ import { RefreshToken } from './auth/entities/refresh-token.entity';
     StorageModule,
     GamificationModule,
     NotificationsModule,
+    KnowledgeBaseModule,
     PublicModule,
   ],
 })

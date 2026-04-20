@@ -1,5 +1,6 @@
 import { AppDataSource } from '../data-source';
 import { seedPlatformAdmin } from './platform-admin.seed';
+import { seedKb } from './kb.seed';
 
 async function runSeeds() {
   console.log('Connecting to database...');
@@ -7,6 +8,7 @@ async function runSeeds() {
   console.log('Running seeds...');
 
   await seedPlatformAdmin(AppDataSource);
+  await seedKb(AppDataSource);
 
   console.log('Seeds complete.');
   await AppDataSource.destroy();
