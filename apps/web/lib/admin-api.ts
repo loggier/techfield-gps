@@ -39,6 +39,7 @@ export interface AdminWO {
   clientName: string;
   vehicleBrand: string;
   vehicleModel: string;
+  country: string;
   zoneCountry: string;
   clientRating: number | null;
   createdAt: string;
@@ -49,6 +50,7 @@ export interface KbPending {
   id: string;
   title: string;
   type: string;
+  country: string;
   zoneCountry: string;
   createdAt: string;
   author: { id: string; name: string; level: string };
