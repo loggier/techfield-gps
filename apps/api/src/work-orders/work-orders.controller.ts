@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { WorkOrdersService } from './work-orders.service';
-import { CreateWorkOrderDto, UpdateWorkOrderDto, CloseWorkOrderDto } from './dto/create-work-order.dto';
+import { CreateWorkOrderDto, UpdateWorkOrderDto, CloseWorkOrderDto, ClientRatingDto } from './dto/create-work-order.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -94,6 +94,16 @@ export class WorkOrdersController {
   @Get(':id/share')
   share(@CurrentUser() user: User, @Param('id') id: string) {
     return this.workOrdersService.getShareLink(id, user.id);
+  }
+
+  /** Client submits star rating (1–5) after receiving their report */
+  @Post(':id/rating')
+  rate(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+    @Body() dto: ClientRatingDto,
+  ) {
+    return this.workOrdersService.submitRating(id, user.id, dto.rating);
   }
 
   @Delete(':id')

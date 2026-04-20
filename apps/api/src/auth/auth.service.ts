@@ -15,6 +15,7 @@ import { Referral } from '../referrals/entities/referral.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { RegisterDto, VerifySmsDto, LoginDto, SetPinDto } from './dto/register.dto';
 import { UserRole } from '@techfield/types';
+import { GamificationService } from '../gamification/gamification.service';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,7 @@ export class AuthService {
     @InjectRepository(RefreshToken) private readonly refreshTokensRepo: Repository<RefreshToken>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly gamificationService: GamificationService,
   ) {}
 
   // ── Register ──────────────────────────────────────────────────────────────
@@ -82,6 +84,7 @@ export class AuthService {
     user.lastActivityAt = new Date();
     await this.usersRepo.save(user);
 
+    this.gamificationService.onUserLogin(user.id).catch(() => {});
     return this.issueTokens(user, deviceInfo);
   }
 
@@ -113,6 +116,7 @@ export class AuthService {
       if (!valid) throw new UnauthorizedException('PIN incorrecto');
       user.lastActivityAt = new Date();
       await this.usersRepo.save(user);
+      this.gamificationService.onUserLogin(user.id).catch(() => {});
       return this.issueTokens(user, deviceInfo);
     }
 

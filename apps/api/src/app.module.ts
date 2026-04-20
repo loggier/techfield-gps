@@ -10,6 +10,7 @@ import { WorkOrdersModule } from './work-orders/work-orders.module';
 import { EvidencesModule } from './evidences/evidences.module';
 import { StorageModule } from './storage/storage.module';
 import { GamificationModule } from './gamification/gamification.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { PublicModule } from './public/public.module';
 
 // Entities
@@ -51,6 +52,7 @@ import { RefreshToken } from './auth/entities/refresh-token.entity';
     EvidencesModule,
     StorageModule,
     GamificationModule,
+    NotificationsModule,
     PublicModule,
   ],
 })

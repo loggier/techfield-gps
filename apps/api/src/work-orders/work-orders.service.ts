@@ -180,6 +180,21 @@ export class WorkOrdersService {
     return this.workOrdersRepo.save(wo);
   }
 
+  // ── Rating ───────────────────────────────────────────────────────────────
+
+  async submitRating(id: string, technicianId: string, rating: number): Promise<WorkOrder> {
+    const wo = await this.findOne(id, technicianId);
+    if (wo.status !== WOStatus.COMPLETED) {
+      throw new ForbiddenException('Solo se pueden calificar OTs completadas');
+    }
+    wo.clientRating = rating;
+    const saved = await this.workOrdersRepo.save(wo);
+    this.gamificationService
+      .onWorkOrderCompleted(technicianId, id, !!wo.clientSignatureUrl, rating)
+      .catch(() => {});
+    return saved;
+  }
+
   // ── Share / Public ────────────────────────────────────────────────────────
 
   async getShareLink(id: string, technicianId: string) {

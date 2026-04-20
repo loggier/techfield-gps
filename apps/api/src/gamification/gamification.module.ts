@@ -7,11 +7,14 @@ import { ScoreService } from './score.service';
 import { PointsLog } from './entities/points-log.entity';
 import { UserBadge } from './entities/user-badge.entity';
 import { User } from '../users/entities/user.entity';
+import { WorkOrder } from '../work-orders/entities/work-order.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PointsLog, UserBadge, User]),
+    TypeOrmModule.forFeature([PointsLog, UserBadge, User, WorkOrder]),
     ScheduleModule.forRoot(),
+    NotificationsModule,
   ],
   controllers: [GamificationController],
   providers: [GamificationService, ScoreService],

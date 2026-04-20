@@ -198,3 +198,10 @@ export class WorkOrderFiltersDto {
   page?: number;
   limit?: number;
 }
+
+export class ClientRatingDto {
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  rating: number;
+}

@@ -8,12 +8,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { User } from '../users/entities/user.entity';
 import { Referral } from '../referrals/entities/referral.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { GamificationModule } from '../gamification/gamification.module';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({}),
     TypeOrmModule.forFeature([User, Referral, RefreshToken]),
+    GamificationModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
