@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 
 const API_URL = process.env.API_URL ?? 'http://localhost:3000';
-const PUBLIC_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://techfieldgps.com';
+const PUBLIC_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://techfieldgps.vemontech.com';
 
 interface Evidence {
   id: string;

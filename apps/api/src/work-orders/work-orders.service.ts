@@ -204,9 +204,9 @@ export class WorkOrdersService {
     }
     return {
       slug: wo.slug,
-      shareUrl: `https://techfieldgps.com/ot/${wo.slug}`,
+      shareUrl: `https://techfieldgps.vemontech.com/ot/${wo.slug}`,
       whatsappUrl: `https://wa.me/?text=${encodeURIComponent(
-        `📍 Reporte de instalación GPS\nhttps://techfieldgps.com/ot/${wo.slug}`,
+        `📍 Reporte de instalación GPS\nhttps://techfieldgps.vemontech.com/ot/${wo.slug}`,
       )}`,
     };
   }

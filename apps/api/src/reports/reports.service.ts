@@ -9,7 +9,7 @@ import { OtPdfDocument } from './ot-pdf';
 
 @Injectable()
 export class ReportsService {
-  private readonly baseUrl = process.env.PUBLIC_BASE_URL ?? 'https://techfieldgps.com';
+  private readonly baseUrl = process.env.PUBLIC_BASE_URL ?? 'https://techfieldgps.vemontech.com';
 
   constructor(
     @InjectRepository(WorkOrder) private readonly workOrdersRepo: Repository<WorkOrder>,

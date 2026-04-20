@@ -50,7 +50,7 @@ export class UsersService {
     const user = await this.findMe(userId);
     return {
       referralCode: user.referralCode,
-      shareUrl: `https://techfieldgps.com/r/${user.referralCode}`,
+      shareUrl: `https://techfieldgps.vemontech.com/r/${user.referralCode}`,
     };
   }
 
@@ -121,7 +121,7 @@ export class UsersService {
       badges,
       recentOts: completedOts,
       completeness,
-      shareUrl: `https://techfieldgps.com/r/${user.referralCode}`,
+      shareUrl: `https://techfieldgps.vemontech.com/r/${user.referralCode}`,
     };
   }
 

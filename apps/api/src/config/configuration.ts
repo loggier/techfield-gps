@@ -36,7 +36,7 @@ export default () => ({
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
     bucketName: process.env.R2_BUCKET_NAME || 'techfield-evidences',
-    publicUrl: process.env.R2_PUBLIC_URL || 'https://evidences.techfieldgps.com',
+    publicUrl: process.env.R2_PUBLIC_URL || 'https://evidences.techfieldgps.vemontech.com',
   },
 
   sentry: {
