@@ -10,20 +10,20 @@ RUN cd packages/types && npm install && npm run build && npm pack
 COPY apps/api/package.json ./apps/api/package.json
 WORKDIR /app/apps/api
 RUN sed -i 's|"@techfield/types": "\*"|"@techfield/types": "file:../../packages/types/techfield-types-1.0.0.tgz"|' package.json
+RUN npm install --legacy-peer-deps
 
-# Install, then deduplicate express: remove any nested copy so all nestjs
-# packages use the single express@4.21.2 at root node_modules
-RUN npm install --legacy-peer-deps && \
-    rm -rf node_modules/@nestjs/platform-express/node_modules && \
-    npm dedupe --legacy-peer-deps 2>/dev/null || true
+# Patch: replace app.router with app._router in the express adapter.
+# Express 4 deprecated the public app.router getter (throws), but the
+# internal app._router works correctly. This fixes isMiddlewareApplied.
+RUN sed -i 's/app\.router/app._router/g' \
+    node_modules/@nestjs/platform-express/adapters/express-adapter.js
 
 # 3. Build
 WORKDIR /app
 COPY apps/api ./apps/api
-COPY apps/api/preload.js ./preload.js
 WORKDIR /app/apps/api
 RUN ./node_modules/.bin/tsc -p tsconfig.build.json
 
 ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["node", "--require", "./preload.js", "dist/main"]
+CMD ["node", "dist/main"]
