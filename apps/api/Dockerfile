@@ -20,9 +20,10 @@ RUN npm install --legacy-peer-deps && \
 # 3. Build
 WORKDIR /app
 COPY apps/api ./apps/api
+COPY apps/api/preload.js ./preload.js
 WORKDIR /app/apps/api
 RUN ./node_modules/.bin/tsc -p tsconfig.build.json
 
 ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["node", "dist/main"]
+CMD ["node", "--require", "./preload.js", "dist/main"]
