@@ -14,7 +14,7 @@ RUN npm install --legacy-peer-deps
 COPY packages/types ./packages/types
 RUN cd packages/types && npm run build
 
-# Remove workspace symlink and replace with real compiled package
+# Replace workspace symlink with real compiled package
 RUN rm -rf ./node_modules/@techfield/types && \
     mkdir -p ./node_modules/@techfield/types && \
     cp packages/types/package.json ./node_modules/@techfield/types/ && \
@@ -25,5 +25,8 @@ COPY apps/api ./apps/api
 RUN cd apps/api && npm run build
 
 ENV NODE_ENV=production
+# Include both root and workspace-level node_modules so all packages resolve
+ENV NODE_PATH=/app/node_modules:/app/apps/api/node_modules
+
 EXPOSE 3000
 CMD ["node", "apps/api/dist/main"]
