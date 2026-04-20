@@ -6,13 +6,18 @@ RUN apk add --no-cache python3 make g++
 COPY packages/types ./packages/types
 RUN cd packages/types && npm install && npm run build && npm pack
 
-# 2. Install API dependencies standalone (no workspace, no symlinks)
+# 2. Install API dependencies standalone
 COPY apps/api/package.json ./apps/api/package.json
 WORKDIR /app/apps/api
 RUN sed -i 's|"@techfield/types": "\*"|"@techfield/types": "file:../../packages/types/techfield-types-1.0.0.tgz"|' package.json
-RUN npm install --legacy-peer-deps
 
-# 3. Build with tsc directly (avoids @nestjs/cli transitive dep issues)
+# Install, then deduplicate express: remove any nested copy so all nestjs
+# packages use the single express@4.21.2 at root node_modules
+RUN npm install --legacy-peer-deps && \
+    rm -rf node_modules/@nestjs/platform-express/node_modules && \
+    npm dedupe --legacy-peer-deps 2>/dev/null || true
+
+# 3. Build
 WORKDIR /app
 COPY apps/api ./apps/api
 WORKDIR /app/apps/api
