@@ -7,13 +7,16 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
   BadRequestException,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { WorkOrdersService } from './work-orders.service';
+import { ReportsService } from '../reports/reports.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto, CloseWorkOrderDto, ClientRatingDto } from './dto/create-work-order.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -22,7 +25,10 @@ import { User } from '../users/entities/user.entity';
 @Controller('work-orders')
 @UseGuards(JwtAuthGuard)
 export class WorkOrdersController {
-  constructor(private readonly workOrdersService: WorkOrdersService) {}
+  constructor(
+    private readonly workOrdersService: WorkOrdersService,
+    private readonly reportsService: ReportsService,
+  ) {}
 
   @Post()
   create(@CurrentUser() user: User, @Body() dto: CreateWorkOrderDto) {
@@ -104,6 +110,22 @@ export class WorkOrdersController {
     @Body() dto: ClientRatingDto,
   ) {
     return this.workOrdersService.submitRating(id, user.id, dto.rating);
+  }
+
+  /** Descargar PDF del reporte (auth) */
+  @Get(':id/pdf')
+  async getPdf(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    const buffer = await this.reportsService.generateOtPdfById(id, user.id);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="reporte-ot-${id}.pdf"`,
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
   }
 
   @Delete(':id')

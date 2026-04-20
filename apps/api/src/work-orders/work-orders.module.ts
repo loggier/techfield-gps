@@ -8,6 +8,7 @@ import { Evidence } from './entities/evidence.entity';
 import { GamificationModule } from '../gamification/gamification.module';
 import { ReferralsModule } from '../referrals/referrals.module';
 import { StorageModule } from '../storage/storage.module';
+import { ReportsModule } from '../reports/reports.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { StorageModule } from '../storage/storage.module';
     GamificationModule,
     ReferralsModule,
     StorageModule,
+    ReportsModule,
     MulterModule.register({ limits: { fileSize: 10 * 1024 * 1024 } }),
   ],
   controllers: [WorkOrdersController],
