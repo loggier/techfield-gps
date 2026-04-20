@@ -1,32 +1,29 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
 WORKDIR /app
 RUN apk add --no-cache python3 make g++
 
-FROM base AS deps
+# Copy monorepo structure
 COPY package*.json ./
 COPY packages/types/package.json ./packages/types/
 COPY apps/api/package.json ./apps/api/
+
+# Install all workspace dependencies
 RUN npm install
 
-FROM deps AS types-build
+# Build types
 COPY packages/types ./packages/types
 RUN cd packages/types && npm run build
 
-FROM types-build AS build
+# Remove workspace symlink and replace with real compiled package
+RUN rm -rf ./node_modules/@techfield/types && \
+    mkdir -p ./node_modules/@techfield/types && \
+    cp packages/types/package.json ./node_modules/@techfield/types/ && \
+    cp -r packages/types/dist ./node_modules/@techfield/types/dist
+
+# Build API
 COPY apps/api ./apps/api
 RUN cd apps/api && npm run build
 
-FROM node:20-alpine AS production
-WORKDIR /app
 ENV NODE_ENV=production
-
-COPY --from=build /app/apps/api/dist ./dist
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
-# Resolve workspace symlink: replace it with actual compiled package
-RUN rm -rf ./node_modules/@techfield/types
-COPY --from=types-build /app/packages/types/package.json ./node_modules/@techfield/types/package.json
-COPY --from=types-build /app/packages/types/dist ./node_modules/@techfield/types/dist
-
 EXPOSE 3000
-CMD ["node", "dist/main"]
+CMD ["node", "apps/api/dist/main"]
