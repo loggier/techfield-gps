@@ -58,11 +58,15 @@ export class NotificationsService implements OnModuleInit {
     if (!this.app || fcmTokens.length === 0) return;
     const chunks = this.chunk(fcmTokens, 500);
     for (const tokens of chunks) {
-      await admin.messaging(this.app).sendEachForMulticast({
-        tokens,
-        notification: { title: payload.title, body: payload.body },
-        data: payload.data ?? {},
-      });
+      await Promise.allSettled(
+        tokens.map(token =>
+          admin.messaging(this.app!).send({
+            token,
+            notification: { title: payload.title, body: payload.body },
+            data: payload.data ?? {},
+          }),
+        ),
+      );
     }
   }
 
