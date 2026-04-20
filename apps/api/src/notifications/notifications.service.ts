@@ -25,12 +25,23 @@ export class NotificationsService implements OnModuleInit {
       return;
     }
 
-    if (admin.apps.length === 0) {
-      this.app = admin.initializeApp({
-        credential: admin.credential.cert({ projectId, privateKey, clientEmail }),
-      });
-    } else {
-      this.app = admin.apps[0];
+    if (privateKey.includes('...') || !privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+      this.logger.warn('Firebase private key is not valid — push notifications disabled');
+      return;
+    }
+
+    try {
+      if (admin.apps.length === 0) {
+        this.app = admin.initializeApp({
+          credential: admin.credential.cert({ projectId, privateKey, clientEmail }),
+        });
+      } else {
+        this.app = admin.apps[0];
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Firebase initialization failed — push notifications disabled: ${message}`);
+      return;
     }
 
     this.logger.log('Firebase FCM initialized');
