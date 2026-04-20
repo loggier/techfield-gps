@@ -1,4 +1,4 @@
-const API = process.env.API_URL ?? 'http://localhost:3000/api/v1';
+const API = process.env.API_URL ?? 'http://api.techfieldgps.vemontech.com/api/v1';
 
 async function adminFetch<T>(path: string, token: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {

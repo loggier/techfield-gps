@@ -40,6 +40,21 @@ services:
       - ./apps/api/src:/app/src
       - ./packages:/app/packages
 
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api.techfieldgps.vemontech.com
+    container_name: techfield-web
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      API_URL: http://api:3000/api/v1
+    depends_on:
+      - api
+
 volumes:
   pgdata:
     driver: local

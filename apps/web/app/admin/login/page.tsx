@@ -12,7 +12,8 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError('');
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://api.techfieldgps.vemontech.com';
+      const res = await fetch(`${apiUrl}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, pin: password }),
