@@ -6,7 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { FastifyReply } from 'fastify';
 import * as Sentry from '@sentry/node';
 
 @Catch()
@@ -15,7 +15,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
+    const reply = ctx.getResponse<FastifyReply>();
 
     const status =
       exception instanceof HttpException
@@ -32,7 +32,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       if (process.env.SENTRY_DSN) Sentry.captureException(exception);
     }
 
-    response.status(status).json({
+    reply.code(status).send({
       statusCode: status,
       timestamp: new Date().toISOString(),
       message,

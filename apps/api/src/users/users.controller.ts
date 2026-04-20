@@ -9,7 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nest-lab/fastify-multer';
 import { UsersService } from './users.service';
 import { ReferralsService } from '../referrals/referrals.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';

@@ -9,7 +9,7 @@ import {
   UseInterceptors,
   BadRequestException,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nest-lab/fastify-multer';
 import { EvidencesService } from './evidences.service';
 import { UploadEvidenceDto } from './dto/upload-evidence.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';

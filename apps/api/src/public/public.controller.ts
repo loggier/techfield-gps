@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { FastifyReply } from 'fastify';
 import { WorkOrdersService } from '../work-orders/work-orders.service';
 import { UsersService } from '../users/users.service';
 import { ReportsService } from '../reports/reports.service';
@@ -20,15 +20,15 @@ export class PublicController {
 
   /** Descargar PDF del reporte (sin auth) */
   @Get('ot/:slug/pdf')
-  async getOtPdf(@Param('slug') slug: string, @Res() res: Response) {
+  async getOtPdf(@Param('slug') slug: string, @Res() res: FastifyReply) {
     const buffer = await this.reportsService.generateOtPdfBySlug(slug);
-    res.set({
+    res.headers({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="reporte-ot-${slug}.pdf"`,
       'Content-Length': buffer.length,
       'Cache-Control': 'public, max-age=3600',
     });
-    res.end(buffer);
+    res.send(buffer);
   }
 
   /** Perfil público por userId (sin auth) */

@@ -13,8 +13,8 @@ import {
   UseInterceptors,
   BadRequestException,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FastifyReply } from 'fastify';
+import { FileInterceptor } from '@nest-lab/fastify-multer';
 import { WorkOrdersService } from './work-orders.service';
 import { ReportsService } from '../reports/reports.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto, CloseWorkOrderDto, ClientRatingDto } from './dto/create-work-order.dto';
@@ -117,15 +117,15 @@ export class WorkOrdersController {
   async getPdf(
     @CurrentUser() user: User,
     @Param('id') id: string,
-    @Res() res: Response,
+    @Res() res: FastifyReply,
   ) {
     const buffer = await this.reportsService.generateOtPdfById(id, user.id);
-    res.set({
+    res.headers({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="reporte-ot-${id}.pdf"`,
       'Content-Length': buffer.length,
     });
-    res.end(buffer);
+    res.send(buffer);
   }
 
   @Delete(':id')
