@@ -54,6 +54,7 @@
     "@types/uuid": "^9.0.7",
     "ts-node": "^10.9.2",
     "typeorm-ts-node-commonjs": "*",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "ansis": "^3.3.1"
   }
 }
