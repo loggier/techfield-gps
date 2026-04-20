@@ -26,6 +26,9 @@ ENV NODE_ENV=production
 COPY --from=build /app/apps/api/dist ./dist
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+# ← copy compiled types so @techfield/types resolves at runtime
+COPY --from=types-build /app/packages/types/dist ./packages/types/dist
+COPY --from=types-build /app/packages/types/package.json ./packages/types/package.json
 
 EXPOSE 3000
 CMD ["node", "dist/main"]
