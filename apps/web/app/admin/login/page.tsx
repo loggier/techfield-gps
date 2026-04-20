@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, password }),
+        body: JSON.stringify({ phone, pin: password }),
       });
       if (!res.ok) throw new Error('Credenciales incorrectas');
       const data = await res.json();
