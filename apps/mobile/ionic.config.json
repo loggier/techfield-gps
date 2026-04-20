@@ -1,0 +1,7 @@
+{
+  "name": "TechField GPS",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

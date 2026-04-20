@@ -1,0 +1,37 @@
+// TechField GPS — Design System
+// Dark mode obligatorio
+
+:root {
+  --tf-green:       #00C47D;
+  --tf-green-dim:   #009960;
+  --tf-green-glow:  rgba(0, 196, 125, 0.15);
+  --tf-bg:          #080C12;
+  --tf-bg2:         #0D1320;
+  --tf-bg3:         #131B2A;
+  --tf-border:      rgba(255,255,255,0.07);
+  --tf-text:        #E8EDF5;
+  --tf-text-muted:  #6B7A99;
+  --tf-amber:       #F59E0B;
+  --tf-blue:        #3B82F6;
+  --tf-purple:      #8B5CF6;
+  --tf-red:         #EF4444;
+  --tf-radius:      16px;
+  --tf-radius-sm:   8px;
+  --tf-font:        'Sora', system-ui, sans-serif;
+
+  // Ionic overrides
+  --ion-background-color:       var(--tf-bg);
+  --ion-text-color:             var(--tf-text);
+  --ion-color-primary:          var(--tf-green);
+  --ion-color-primary-rgb:      0, 196, 125;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-shade:    var(--tf-green-dim);
+  --ion-color-primary-tint:     #1acf8a;
+  --ion-toolbar-background:     var(--tf-bg2);
+  --ion-tab-bar-background:     var(--tf-bg2);
+  --ion-tab-bar-border-color:   var(--tf-border);
+  --ion-item-background:        var(--tf-bg2);
+  --ion-card-background:        var(--tf-bg2);
+  --ion-border-color:           var(--tf-border);
+  --ion-font-family:            var(--tf-font);
+}

@@ -1,0 +1,46 @@
+{
+  "name": "@techfield/mobile",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "ionic serve",
+    "build": "ionic build",
+    "build:prod": "ionic build --prod",
+    "android": "ionic capacitor run android",
+    "ios": "ionic capacitor run ios",
+    "sync": "ionic capacitor sync"
+  },
+  "dependencies": {
+    "@angular/common": "^17.3.0",
+    "@angular/core": "^17.3.0",
+    "@angular/forms": "^17.3.0",
+    "@angular/platform-browser": "^17.3.0",
+    "@angular/platform-browser-dynamic": "^17.3.0",
+    "@angular/router": "^17.3.0",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/camera": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/filesystem": "^6.0.0",
+    "@capacitor/geolocation": "^6.0.0",
+    "@capacitor/network": "^6.0.0",
+    "@capacitor/push-notifications": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0",
+    "@ionic/angular": "^7.8.0",
+    "@ionic/angular-toolkit": "^11.0.0",
+    "ionicons": "^7.4.0",
+    "rxjs": "^7.8.0",
+    "signature_pad": "^4.1.7",
+    "tslib": "^2.6.0",
+    "zone.js": "~0.14.3"
+  },
+  "devDependencies": {
+    "@angular/cli": "^17.3.0",
+    "@angular/compiler": "^17.3.0",
+    "@angular/compiler-cli": "^17.3.0",
+    "@capacitor/cli": "^6.0.0",
+    "@ionic/cli": "^7.2.0",
+    "@types/node": "^20.11.0",
+    "typescript": "~5.3.0"
+  }
+}

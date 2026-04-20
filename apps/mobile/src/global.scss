@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+* { font-family: 'Sora', system-ui, sans-serif; }
+
+ion-content { --background: var(--tf-bg); }
+ion-toolbar  { --background: var(--tf-bg2); border-bottom: 1px solid var(--tf-border); }
+ion-tab-bar  { --background: var(--tf-bg2); border-top: 1px solid var(--tf-border); height: 64px; }
+ion-tab-button { --color: var(--tf-text-muted); --color-selected: var(--tf-green); }
+ion-card     { --background: var(--tf-bg2); border-radius: var(--tf-radius); border: 1px solid var(--tf-border); margin: 0; }
+ion-item     { --background: transparent; --border-color: var(--tf-border); }
+ion-input    { --background: var(--tf-bg3); --border-radius: var(--tf-radius-sm); --padding-start: 16px; }
+ion-textarea { --background: var(--tf-bg3); border-radius: var(--tf-radius-sm); padding: 12px; }
+ion-button[shape="round"] { --border-radius: var(--tf-radius); font-weight: 600; }
+ion-back-button { --color: var(--tf-text-muted); }
+
+.tf-page-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tf-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tf-text-muted);
+  margin: 0 0 8px;
+}
+
+.tf-fab {
+  --background: var(--tf-green);
+  --color: #000;
+  --box-shadow: 0 4px 20px var(--tf-green-glow);
+}
+
+@keyframes skeleton-shine {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
