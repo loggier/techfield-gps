@@ -8,7 +8,7 @@ COPY packages/types/package.json ./packages/types/
 COPY apps/api/package.json ./apps/api/
 
 # Install all workspace dependencies
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Build types
 COPY packages/types ./packages/types
