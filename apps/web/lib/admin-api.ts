@@ -24,11 +24,11 @@ export interface AdminUser {
   id: string;
   name: string;
   phone: string;
-  country: string;
+  zoneCountry: string;
   level: string;
   activityScore: number;
   totalPoints: number;
-  isActive: boolean;
+  isMarketplaceVisible: boolean;
   createdAt: string;
 }
 
@@ -39,7 +39,7 @@ export interface AdminWO {
   clientName: string;
   vehicleBrand: string;
   vehicleModel: string;
-  country: string;
+  zoneCountry: string;
   clientRating: number | null;
   createdAt: string;
   technician: { id: string; name: string; level: string };
@@ -49,7 +49,7 @@ export interface KbPending {
   id: string;
   title: string;
   type: string;
-  country: string;
+  zoneCountry: string;
   createdAt: string;
   author: { id: string; name: string; level: string };
 }

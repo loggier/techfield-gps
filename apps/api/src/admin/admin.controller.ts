@@ -28,24 +28,22 @@ export class AdminController {
   @Get('stats')
   async stats() {
     const [
-      totalUsers, activeUsers, totalOts, closedOts, pendingKb, approvedKb,
+      totalUsers, totalOts, closedOts, pendingKb, approvedKb,
     ] = await Promise.all([
       this.usersRepo.count(),
-      this.usersRepo.count({ where: { isActive: true } }),
       this.woRepo.count(),
       this.woRepo.count({ where: { status: WOStatus.COMPLETED } }),
       this.kbRepo.count({ where: { status: KbStatus.PENDING } }),
       this.kbRepo.count({ where: { status: KbStatus.APPROVED } }),
     ]);
 
-    // Weekly new users (last 7 days)
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const newUsersWeek = await this.usersRepo
       .createQueryBuilder('u')
       .where('u.createdAt >= :since', { since })
       .getCount();
 
-    return { totalUsers, activeUsers, newUsersWeek, totalOts, closedOts, pendingKb, approvedKb };
+    return { totalUsers, newUsersWeek, totalOts, closedOts, pendingKb, approvedKb };
   }
 
   // ── Users ─────────────────────────────────────────────────────────────────
@@ -60,13 +58,16 @@ export class AdminController {
   ) {
     const qb = this.usersRepo
       .createQueryBuilder('u')
-      .select(['u.id', 'u.name', 'u.phone', 'u.email', 'u.country', 'u.level',
-               'u.activityScore', 'u.totalPoints', 'u.isActive', 'u.referralCode', 'u.createdAt'])
+      .select([
+        'u.id', 'u.name', 'u.phone', 'u.email', 'u.zoneCountry', 'u.level',
+        'u.activityScore', 'u.totalPoints', 'u.isMarketplaceVisible',
+        'u.referralCode', 'u.createdAt',
+      ])
       .orderBy('u.createdAt', 'DESC');
 
     if (q) qb.andWhere('u.name ILIKE :q OR u.phone ILIKE :q', { q: `%${q}%` });
     if (level) qb.andWhere('u.level = :level', { level });
-    if (country) qb.andWhere('u.country = :country', { country });
+    if (country) qb.andWhere('u.zoneCountry = :country', { country });
 
     const [items, total] = await qb.skip((page - 1) * limit).take(limit).getManyAndCount();
     return { items, total, page, limit, pages: Math.ceil(total / limit) };
@@ -74,11 +75,15 @@ export class AdminController {
 
   @Get('users/:id')
   async user(@Param('id') id: string) {
-    return this.usersRepo.findOne({
-      where: { id },
-      select: ['id', 'name', 'phone', 'email', 'country', 'level', 'activityScore',
-               'totalPoints', 'isActive', 'referralCode', 'fcmToken', 'createdAt'],
-    });
+    return this.usersRepo
+      .createQueryBuilder('u')
+      .select([
+        'u.id', 'u.name', 'u.phone', 'u.email', 'u.zoneCountry', 'u.level',
+        'u.activityScore', 'u.totalPoints', 'u.isMarketplaceVisible',
+        'u.referralCode', 'u.fcmToken', 'u.createdAt',
+      ])
+      .where('u.id = :id', { id })
+      .getOne();
   }
 
   // ── Work Orders ───────────────────────────────────────────────────────────
@@ -93,9 +98,11 @@ export class AdminController {
     const qb = this.woRepo
       .createQueryBuilder('wo')
       .leftJoinAndSelect('wo.technician', 'tech')
-      .select(['wo.id', 'wo.slug', 'wo.status', 'wo.clientName', 'wo.vehicleBrand',
-               'wo.vehicleModel', 'wo.country', 'wo.clientRating', 'wo.createdAt',
-               'tech.id', 'tech.name', 'tech.level'])
+      .select([
+        'wo.id', 'wo.slug', 'wo.status', 'wo.clientName', 'wo.vehicleBrand',
+        'wo.vehicleModel', 'wo.country', 'wo.clientRating', 'wo.createdAt',
+        'tech.id', 'tech.name', 'tech.level',
+      ])
       .orderBy('wo.createdAt', 'DESC');
 
     if (status) qb.andWhere('wo.status = :status', { status });

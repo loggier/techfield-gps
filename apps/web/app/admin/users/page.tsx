@@ -41,7 +41,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: {
               <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                 <td style={{ padding: '12px 16px', color: '#fff' }}>{u.name}</td>
                 <td style={{ padding: '12px 16px', color: '#aaa' }}>{u.phone}</td>
-                <td style={{ padding: '12px 16px', color: '#aaa' }}>{u.country}</td>
+                <td style={{ padding: '12px 16px', color: '#aaa' }}>{u.zoneCountry}</td>
                 <td style={{ padding: '12px 16px' }}>
                   <span style={{ background: LEVEL_COLORS[u.level] ?? '#333', color: '#fff', borderRadius: 6, padding: '2px 8px', fontSize: 12, fontWeight: 600, textTransform: 'capitalize' }}>
                     {u.level}
@@ -50,7 +50,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: {
                 <td style={{ padding: '12px 16px', color: '#00C47D', fontWeight: 700 }}>{u.activityScore}</td>
                 <td style={{ padding: '12px 16px', color: '#aaa' }}>{u.totalPoints.toLocaleString()}</td>
                 <td style={{ padding: '12px 16px' }}>
-                  <span style={{ color: u.isActive ? '#00C47D' : '#666' }}>{u.isActive ? '✓' : '–'}</span>
+                  <span style={{ color: u.isMarketplaceVisible ? '#00C47D' : '#666' }}>{u.isMarketplaceVisible ? '✓' : '–'}</span>
                 </td>
                 <td style={{ padding: '12px 16px', color: '#666', fontSize: 12 }}>
                   {new Date(u.createdAt).toLocaleDateString('es-MX')}
