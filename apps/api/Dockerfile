@@ -2,31 +2,24 @@ FROM node:20-alpine
 WORKDIR /app
 RUN apk add --no-cache python3 make g++
 
-# Copy monorepo structure
-COPY package*.json ./
-COPY packages/types/package.json ./packages/types/
-COPY apps/api/package.json ./apps/api/
+# 1. Build & pack @techfield/types as a self-contained tarball
+COPY packages/types ./packages/types
+RUN cd packages/types && npm install && npm run build && npm pack
+# produces: packages/types/techfield-types-1.0.0.tgz
 
-# Install all workspace dependencies
+# 2. Install API dependencies standalone (no workspace, no symlinks)
+COPY apps/api/package.json ./apps/api/package.json
+WORKDIR /app/apps/api
+RUN sed -i 's|"@techfield/types": "\*"|"@techfield/types": "file:../../packages/types/techfield-types-1.0.0.tgz"|' package.json
 RUN npm install --legacy-peer-deps
 
-# Build types
-COPY packages/types ./packages/types
-RUN cd packages/types && npm run build
-
-# Replace workspace symlink with real compiled package
-RUN rm -rf ./node_modules/@techfield/types && \
-    mkdir -p ./node_modules/@techfield/types && \
-    cp packages/types/package.json ./node_modules/@techfield/types/ && \
-    cp -r packages/types/dist ./node_modules/@techfield/types/dist
-
-# Build API
+# 3. Build API (types already installed, no workspace needed)
+WORKDIR /app
 COPY apps/api ./apps/api
-RUN cd apps/api && npm run build
+WORKDIR /app/apps/api
+RUN npm run build
 
 ENV NODE_ENV=production
-# Include both root and workspace-level node_modules so all packages resolve
-ENV NODE_PATH=/app/node_modules:/app/apps/api/node_modules
-
 EXPOSE 3000
-CMD ["node", "apps/api/dist/main"]
+# Run from apps/api so node_modules resolution is local and unambiguous
+CMD ["node", "dist/main"]
