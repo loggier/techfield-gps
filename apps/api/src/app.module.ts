@@ -13,6 +13,7 @@ import { GamificationModule } from './gamification/gamification.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { PublicModule } from './public/public.module';
+import { AdminModule } from './admin/admin.module';
 
 // Entities
 import { User } from './users/entities/user.entity';
@@ -56,6 +57,7 @@ import { RefreshToken } from './auth/entities/refresh-token.entity';
     NotificationsModule,
     KnowledgeBaseModule,
     PublicModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

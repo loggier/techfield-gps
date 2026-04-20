@@ -37,6 +37,8 @@
     "rxjs": "^7.8.1",
     "short-uuid": "^5.2.0",
     "twilio": "^5.0.0",
+    "@sentry/node": "^8.0.0",
+    "@sentry/profiling-node": "^8.0.0",
     "typeorm": "^0.3.19",
     "uuid": "^9.0.1"
   },

@@ -1,0 +1,3 @@
+app_identifier("com.vemontech.techfield")
+package_name("com.vemontech.techfield")
+json_key_file("fastlane/play-store-key.json")
