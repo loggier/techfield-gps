@@ -12,11 +12,17 @@ WORKDIR /app/apps/api
 RUN sed -i 's|"@techfield/types": "\*"|"@techfield/types": "file:../../packages/types/techfield-types-1.0.0.tgz"|' package.json
 RUN npm install --legacy-peer-deps
 
-# Patch: replace app.router with app._router in the express adapter.
-# Express 4 deprecated the public app.router getter (throws), but the
-# internal app._router works correctly. This fixes isMiddlewareApplied.
-RUN sed -i 's/app\.router/app._router/g' \
-    node_modules/@nestjs/platform-express/adapters/express-adapter.js
+# NestJS's isMiddlewareApplied accesses app.router which Express 4 made a
+# throwing getter. Patch the adapter to use app._router (the real router).
+RUN node -e " \
+  const fs = require('fs'); \
+  const p = 'node_modules/@nestjs/platform-express/adapters/express-adapter.js'; \
+  let c = fs.readFileSync(p, 'utf8'); \
+  const count = (c.match(/app\.router/g) || []).length; \
+  c = c.split('app.router').join('app._router'); \
+  fs.writeFileSync(p, c); \
+  console.log('express-adapter.js: replaced ' + count + ' app.router -> app._router'); \
+"
 
 # 3. Build
 WORKDIR /app
